@@ -6,7 +6,7 @@
 开发一个完整的个人博客系统，该系统需包含后台登录和前台显示两大核心功能模块。技术栈要求如下：前端采用Vue框架结合Vite构建工具，并使用tailwindcss实现UI界面；后端采用Go 语言，数据库使用 sqlite存储，支持 markdown 编写博客文章，支持复制粘贴上传图片
 ```
 
-## 使用的模型
+## 测试模型
 
 > 一开始打算是测多个模型的效果，后来觉得主要是为了测试 kontext 环境下的效果，所以就只测了 minimax-2.7
 
@@ -15,4 +15,4 @@
 ## 产物目录
 
 - 使用 kontext 环境下的产物 [kontext](./kontext)
-- 使用非 kontext 环境下的产物 [non-kontxt](./non-kontxt)
+- 使用非 kontext 环境下的产物 [non-kontext](./non-kontext)
