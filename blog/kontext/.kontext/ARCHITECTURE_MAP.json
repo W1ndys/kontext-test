@@ -1,0 +1,194 @@
+{
+  "layers": [
+    {
+      "description": "面向访客的博客前台展示页面，包括首页文章列表、文章详情（Markdown 渲染与代码高亮）、分类归档、标签归档、时间轴归档、关于页面和搜索功能",
+      "name": "前端展示层 - 前台页面",
+      "packages": [
+        "frontend/src/views/blog/Home.vue",
+        "frontend/src/views/blog/ArticleDetail.vue",
+        "frontend/src/views/blog/CategoryArchive.vue",
+        "frontend/src/views/blog/TagArchive.vue",
+        "frontend/src/views/blog/Timeline.vue",
+        "frontend/src/views/blog/About.vue",
+        "frontend/src/views/blog/Search.vue"
+      ]
+    },
+    {
+      "description": "面向管理员的后台管理页面，包括登录页、仪表盘、文章列表与编辑（含 Markdown 编辑器和图片上传）、分类管理、标签管理",
+      "name": "前端展示层 - 后台管理页面",
+      "packages": [
+        "frontend/src/views/admin/Login.vue",
+        "frontend/src/views/admin/Dashboard.vue",
+        "frontend/src/views/admin/ArticleList.vue",
+        "frontend/src/views/admin/ArticleEdit.vue",
+        "frontend/src/views/admin/CategoryManage.vue",
+        "frontend/src/views/admin/TagManage.vue"
+      ]
+    },
+    {
+      "description": "前端可复用的通用 UI 组件，如导航栏、侧边栏、分页组件、文章卡片、标签云、搜索框、Markdown 渲染器封装、图片上传组件等",
+      "name": "前端通用组件层",
+      "packages": [
+        "frontend/src/components"
+      ]
+    },
+    {
+      "description": "Vue Router 路由配置，定义前台博客页面和后台管理页面的路由映射，包含路由守卫（JWT Token 鉴权跳转逻辑）",
+      "name": "前端路由层",
+      "packages": [
+        "frontend/src/router"
+      ]
+    },
+    {
+      "description": "Pinia 状态管理，管理全局状态如用户认证信息（Token 存储与读取）、用户信息、以及可能的主题/配置状态",
+      "name": "前端状态管理层",
+      "packages": [
+        "frontend/src/stores"
+      ]
+    },
+    {
+      "description": "Axios 请求封装，包括请求/响应拦截器（自动携带 JWT Token、统一错误处理）、各业务模块的 API 调用函数（文章、分类、标签、认证、上传、统计、搜索等）",
+      "name": "前端 API 封装层",
+      "packages": [
+        "frontend/src/api"
+      ]
+    },
+    {
+      "description": "前端项目的工具函数（日期格式化、文本截断等）、常量定义、TailwindCSS 配置、Vite 构建配置、ESLint/Prettier 配置",
+      "name": "前端工具与配置层",
+      "packages": [
+        "frontend/src/utils",
+        "frontend/src/assets",
+        "frontend/tailwind.config.js",
+        "frontend/vite.config.js",
+        "frontend/.eslintrc.js",
+        "frontend/.prettierrc"
+      ]
+    },
+    {
+      "description": "Gin 框架的路由定义，将 HTTP 请求路径映射到对应的控制器处理函数，区分公开 API（前台访客访问）和受保护 API（需 JWT 认证的后台管理接口）",
+      "name": "后端路由层",
+      "packages": [
+        "backend/router"
+      ]
+    },
+    {
+      "description": "Gin 中间件，包括 JWT 认证中间件（Token 解析与验证）、CORS 跨域中间件、可能的日志中间件和错误恢复中间件",
+      "name": "后端中间件层",
+      "packages": [
+        "backend/middleware"
+      ]
+    },
+    {
+      "description": "处理 HTTP 请求的控制器（Handler），负责参数校验、调用模型层或服务逻辑、返回 JSON 响应。包含文章控制器、分类控制器、标签控制器、认证控制器、上传控制器、统计控制器、搜索控制器",
+      "name": "后端控制器层",
+      "packages": [
+        "backend/controller"
+      ]
+    },
+    {
+      "description": "GORM 数据模型定义与数据库操作，包括文章（Article）、分类（Category）、标签（Tag）、管理员（Admin）、文章-标签关联等模型的结构体定义及数据库 CRUD 操作",
+      "name": "后端数据模型层",
+      "packages": [
+        "backend/model"
+      ]
+    },
+    {
+      "description": "SQLite 数据库连接初始化、GORM 配置、自动迁移（AutoMigrate）表结构、数据库实例的全局管理",
+      "name": "后端数据库初始化层",
+      "packages": [
+        "backend/database"
+      ]
+    },
+    {
+      "description": "后端工具函数和配置管理，包括 JWT Token 生成与解析工具、密码加密工具、响应格式统一封装、应用配置加载（端口、密钥、数据库路径等）",
+      "name": "后端工具与配置层",
+      "packages": [
+        "backend/utils",
+        "backend/config"
+      ]
+    },
+    {
+      "description": "Docker 容器化部署相关配置，包括前端 Dockerfile、后端 Dockerfile、docker-compose.yml 编排文件，定义服务启动、端口映射、数据卷挂载（SQLite 数据库文件和上传图片目录持久化）",
+      "name": "部署与容器化层",
+      "packages": [
+        "docker-compose.yml",
+        "frontend/Dockerfile",
+        "backend/Dockerfile"
+      ]
+    },
+    {
+      "description": "后端本地图片存储目录，用于保存通过 Markdown 编辑器上传的图片文件，由后端提供静态文件服务供前端访问",
+      "name": "静态资源与上传存储层",
+      "packages": [
+        "backend/uploads"
+      ]
+    }
+  ],
+  "rules": [
+    {
+      "reason": "保持页面组件职责单一，数据获取通过 API 层统一处理，状态通过 Pinia 统一管理，避免页面组件中散落大量请求逻辑和状态逻辑",
+      "rule": "前端页面层（前台页面、后台管理页面）只能依赖前端通用组件层、前端路由层、前端状态管理层和前端 API 封装层，不得直接调用后端代码或直接操作浏览器存储"
+    },
+    {
+      "reason": "统一管理请求拦截（自动携带 JWT Token）、响应拦截（统一错误处理、Token 过期处理），避免各页面组件中重复编写请求逻辑",
+      "rule": "前端 API 封装层是前端与后端通信的唯一出口，所有 HTTP 请求必须通过该层发出"
+    },
+    {
+      "reason": "确保后台管理功能的访问安全，路由守卫作为前端第一道鉴权屏障，配合后端中间件形成双重保护",
+      "rule": "前端路由层负责路由守卫逻辑，后台管理页面路由必须通过 JWT Token 存在性检查，未认证用户跳转到登录页"
+    },
+    {
+      "reason": "状态管理作为全局数据中心，保持单向数据流，避免循环依赖",
+      "rule": "前端状态管理层（Pinia Store）不得直接依赖页面组件，只能被页面组件和 API 层调用"
+    },
+    {
+      "reason": "保证通用组件的可复用性和独立性，遵循 Vue 组件设计最佳实践",
+      "rule": "前端通用组件层不得依赖具体页面组件，也不得直接调用 API 层，数据通过 props 传入、事件通过 emit 传出"
+    },
+    {
+      "reason": "路由配置保持简洁清晰，便于快速了解 API 全貌，业务逻辑集中在控制器层便于维护",
+      "rule": "后端路由层只负责路径映射和中间件挂载，不包含业务逻辑，具体处理委托给控制器层"
+    },
+    {
+      "reason": "中间件作为请求处理管道的通用环节，保持通用性和可插拔性，避免与业务逻辑耦合",
+      "rule": "后端中间件层不得依赖控制器层或模型层的具体业务逻辑，只处理横切关注点（认证、跨域、日志、错误恢复）"
+    },
+    {
+      "reason": "控制器聚焦于请求参数处理和响应组装，数据库操作封装在模型层，实现关注点分离",
+      "rule": "后端控制器层依赖模型层进行数据操作，依赖工具层进行 Token 解析和响应格式化，但不得直接操作数据库连接"
+    },
+    {
+      "reason": "数据库操作集中管理，避免 SQL 逻辑散落在控制器中，便于后续数据库层面的优化和修改",
+      "rule": "后端模型层依赖数据库初始化层获取数据库实例，封装所有 GORM 数据库操作，对上层提供结构化的数据访问接口"
+    },
+    {
+      "reason": "单一数据库入口便于管理连接生命周期、配置连接参数、执行自动迁移",
+      "rule": "后端数据库初始化层是数据库连接的唯一创建点，提供全局数据库实例，其他层通过该实例访问数据库"
+    },
+    {
+      "reason": "工具函数和配置管理属于基础能力，保持零业务依赖确保其稳定性和可复用性",
+      "rule": "后端工具与配置层不得依赖控制器层、模型层或路由层，作为最底层的基础设施被上层引用"
+    },
+    {
+      "reason": "前后端分离架构的核心约束，确保两端可独立开发、测试、部署，接口契约清晰",
+      "rule": "前端与后端之间仅通过 RESTful JSON API 通信，前端不直接访问 SQLite 数据库，后端不返回 HTML 页面"
+    },
+    {
+      "reason": "确保后台管理接口的安全性，防止未授权访问修改数据",
+      "rule": "后端公开 API（前台访客可访问）和受保护 API（需 JWT 认证）必须在路由层明确区分，受保护路由组必须挂载 JWT 认证中间件"
+    },
+    {
+      "reason": "防止匿名用户上传恶意文件，图片通过后端统一服务确保访问路径可控",
+      "rule": "图片上传接口属于受保护 API，上传文件保存在后端 uploads 目录，通过后端静态文件服务对外提供访问"
+    },
+    {
+      "reason": "SQLite 数据库和上传图片是持久化数据，容器本身是无状态的，必须通过卷挂载实现数据持久化",
+      "rule": "部署与容器化层的配置必须将 SQLite 数据库文件和 uploads 图片目录挂载到宿主机卷，确保容器重建后数据不丢失"
+    },
+    {
+      "reason": "严格的单向依赖保证架构的层次清晰，避免循环依赖导致的代码耦合和维护困难",
+      "rule": "后端各层依赖方向为：路由层 -> 中间件层 -> 控制器层 -> 模型层 -> 数据库初始化层，工具与配置层被各层横向引用，不允许反向依赖"
+    }
+  ]
+}

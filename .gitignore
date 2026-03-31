@@ -1,0 +1,7 @@
+.spec-workflow/
+logs/
+.cache/
+dist/
+node_modules/
+*.log
+*.tmp

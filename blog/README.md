@@ -8,11 +8,30 @@
 
 ## 测试模型
 
-> 一开始打算是测多个模型的效果，后来觉得主要是为了测试 kontext 环境下的效果，所以就只测了 minimax-2.7
+> 一开始打算是测多个模型的效果，后来觉得主要是为了测试 kontext 环境下的效果，所以就只测了 minimax-2.7 和 claude-opus-4-6 ，一个国内一个国外的模型效果
 
-- minimax-2.7
+## 测试环境介绍
+
+Claude Code，安装了 superpowers （但在 kontext 环境下实际并未使用该 skills ）
 
 ## 产物目录
 
-- 使用 kontext 环境下的产物 [kontext](./kontext)
-- 使用非 kontext 环境下的产物 [non-kontext](./non-kontext)
+### kontext 环境下的产物
+
+所在目录： [kontext](./kontext)
+
+生成报告：
+
+耗时：13m左右
+
+生成产物遇到了sqlite3库报错，整体界面UI还凑合，无法新建文章
+
+```
+[error] failed to initialize database, got error Binary was compiled with 'CGO_ENABLED=0', go-sqlite3 requires cgo to work. This is a stub
+2026/04/01 00:46:07 failed to connect database: Binary was compiled with 'CGO_ENABLED=0', go-sqlite3 requires cgo to work. This is a stub
+exit status 1
+```
+
+### 非 kontext 环境下的产物
+
+所在目录： [non-kontext](./non-kontext)

@@ -1,0 +1,178 @@
+{
+  "project": {
+    "business_context": "个人博客平台，面向独立博主使用，用于发布和展示 Markdown 格式的技术或生活文章。系统分为后台管理和前台展示两大模块：后台提供管理员登录、文章增删改查（支持 Markdown 编写和图片粘贴上传）、分类管理、标签管理及基础统计仪表盘功能；前台提供文章列表浏览、文章详情阅读（Markdown 前端渲染、代码高亮）、分类归档、标签归档、时间轴归档、关于页面和搜索功能。图片采用本地服务器存储，认证采用 JWT Token 无状态方案，整体通过 Docker Compose 一键容器化部署。",
+    "core_flows": [
+      {
+        "entry_point": "frontend/src/views/admin/Login.vue",
+        "name": "管理员登录认证",
+        "steps": "管理员在后台登录页输入账号密码 -> 前端发送登录请求到后端 API -> 后端校验凭证并生成 JWT Token 返回 -> 前端存储 Token 并跳转到后台仪表盘 -> 后续请求携带 Token 通过中间件鉴权"
+      },
+      {
+        "entry_point": "frontend/src/views/admin/ArticleEdit.vue",
+        "name": "文章创建与编辑",
+        "steps": "管理员在后台进入文章编辑页 -> 使用 Markdown 编辑器（Vditor/md-editor-v3）编写内容 -> 支持复制粘贴图片自动上传到后端 -> 选择分类和标签 -> 提交保存文章 -> 后端将文章数据和元信息存入 SQLite"
+      },
+      {
+        "entry_point": "frontend/src/views/admin/ArticleList.vue",
+        "name": "文章管理（列表与删除）",
+        "steps": "管理员在后台文章管理页查看文章列表（分页） -> 可进行编辑或删除操作 -> 前端调用后端 API 执行对应操作 -> 后端更新 SQLite 数据库"
+      },
+      {
+        "entry_point": "frontend/src/views/admin/CategoryManage.vue",
+        "name": "分类管理",
+        "steps": "管理员在后台分类管理页查看所有分类 -> 可新增、编辑、删除分类 -> 前端调用后端分类 API -> 后端操作 SQLite 中分类表"
+      },
+      {
+        "entry_point": "frontend/src/views/admin/TagManage.vue",
+        "name": "标签管理",
+        "steps": "管理员在后台标签管理页查看所有标签 -> 可新增、编辑、删除标签 -> 前端调用后端标签 API -> 后端操作 SQLite 中标签表"
+      },
+      {
+        "entry_point": "frontend/src/views/admin/Dashboard.vue",
+        "name": "统计仪表盘",
+        "steps": "管理员登录后进入仪表盘页面 -> 前端请求后端统计 API -> 后端查询 SQLite 聚合文章数、分类数、标签数、访问量等数据 -> 前端展示统计卡片和概览信息"
+      },
+      {
+        "entry_point": "backend/controller/upload.go",
+        "name": "图片上传",
+        "steps": "用户在 Markdown 编辑器中粘贴或选择图片 -> 编辑器触发上传回调 -> 前端将图片以 multipart/form-data 发送到后端上传 API -> 后端将图片保存到本地项目目录 -> 返回图片访问 URL -> 编辑器插入 Markdown 图片语法"
+      },
+      {
+        "entry_point": "frontend/src/views/blog/Home.vue",
+        "name": "前台首页文章列表浏览",
+        "steps": "访客打开博客首页 -> 前端请求后端文章列表 API（分页） -> 后端从 SQLite 查询已发布文章并返回 -> 前端渲染文章卡片列表，展示标题、摘要、发布时间、分类和标签"
+      },
+      {
+        "entry_point": "frontend/src/views/blog/ArticleDetail.vue",
+        "name": "文章详情阅读",
+        "steps": "访客点击文章标题进入详情页 -> 前端请求后端文章详情 API -> 后端返回文章 Markdown 内容及元信息 -> 前端使用 Markdown 渲染库将内容渲染为 HTML（含代码高亮） -> 展示完整文章"
+      },
+      {
+        "entry_point": "frontend/src/views/blog/CategoryArchive.vue",
+        "name": "分类归档浏览",
+        "steps": "访客进入分类归档页 -> 前端请求后端分类列表及各分类下文章 -> 展示分类归档视图，点击分类可查看该分类下所有文章"
+      },
+      {
+        "entry_point": "frontend/src/views/blog/TagArchive.vue",
+        "name": "标签归档浏览",
+        "steps": "访客进入标签归档页 -> 前端请求后端标签列表及各标签下文章 -> 展示标签云或标签列表，点击标签可查看该标签下所有文章"
+      },
+      {
+        "entry_point": "frontend/src/views/blog/Timeline.vue",
+        "name": "时间轴归档浏览",
+        "steps": "访客进入时间轴页面 -> 前端请求后端按时间排序的文章列表 -> 前端以时间轴形式展示文章发布时间线"
+      },
+      {
+        "entry_point": "frontend/src/views/blog/Search.vue",
+        "name": "搜索功能",
+        "steps": "访客在搜索框输入关键词 -> 前端调用后端搜索 API（关键词匹配文章标题和内容） -> 后端在 SQLite 中进行模糊查询 -> 返回匹配文章列表 -> 前端展示搜索结果"
+      },
+      {
+        "entry_point": "frontend/src/views/blog/About.vue",
+        "name": "关于页面",
+        "steps": "访客进入关于页面 -> 前端展示博主个人介绍等静态或可配置内容"
+      }
+    ],
+    "name": "个人博客系统",
+    "one_line": "基于 Vue 3 + Go (Gin) 的前后端分离个人博客系统，支持 Markdown 编写与前端渲染",
+    "type": "web_app"
+  },
+  "scale": {
+    "estimated_files": "50-70",
+    "modules": "12",
+    "phase": "development"
+  },
+  "status": {
+    "completed_modules": [],
+    "in_progress": [
+      "项目架构设计与目录结构规划",
+      "技术选型确认"
+    ],
+    "not_started": [
+      "后端项目初始化（Go Gin 脚手架）",
+      "前端项目初始化（Vue 3 + Vite + TailwindCSS 脚手架）",
+      "数据库模型设计（SQLite 表结构：文章、分类、标签、管理员、访问统计）",
+      "后端 JWT 认证中间件",
+      "后端管理员登录 API",
+      "后端文章 CRUD API",
+      "后端分类 CRUD API",
+      "后端标签 CRUD API",
+      "后端图片上传 API",
+      "后端统计数据 API",
+      "后端文章搜索 API",
+      "前端路由配置（前台 + 后台）",
+      "前端 API 封装（Axios 请求拦截、Token 管理）",
+      "前端状态管理（Pinia）",
+      "后台管理 - 登录页面",
+      "后台管理 - 仪表盘页面",
+      "后台管理 - 文章列表与编辑页面",
+      "后台管理 - 分类管理页面",
+      "后台管理 - 标签管理页面",
+      "前台展示 - 首页文章列表",
+      "前台展示 - 文章详情页（Markdown 渲染 + 代码高亮）",
+      "前台展示 - 分类归档页",
+      "前台展示 - 标签归档页",
+      "前台展示 - 时间轴归档页",
+      "前台展示 - 关于页面",
+      "前台展示 - 搜索功能",
+      "Docker Compose 部署配置",
+      "ESLint + Prettier 前端代码规范配置"
+    ]
+  },
+  "tech_stack": {
+    "cli_framework": "无（Web 应用）",
+    "data_format": "JSON（RESTful API 数据交换格式）",
+    "git_client": "无",
+    "key_decisions": [
+      {
+        "constraint": "前端通过 RESTful API 与后端通信，需约定统一的 API 接口规范",
+        "decision": "前后端分离架构，frontend 和 backend 独立目录",
+        "reason": "开发灵活，前后端可独立开发、测试和部署，职责清晰"
+      },
+      {
+        "constraint": "团队需具备 Go 语言开发经验",
+        "decision": "后端使用 Go + Gin 框架",
+        "reason": "Gin 轻量高性能，社区活跃，适合构建 RESTful API"
+      },
+      {
+        "constraint": "不支持高并发写入场景，适合个人博客单用户管理的场景",
+        "decision": "数据库使用 SQLite",
+        "reason": "个人博客数据量小，SQLite 零配置、嵌入式、部署简单，无需额外数据库服务"
+      },
+      {
+        "constraint": "需熟悉 Vue 3 Composition API 和 TailwindCSS 工具类写法",
+        "decision": "前端使用 Vue 3 + Vite + TailwindCSS",
+        "reason": "Vue 3 组合式 API 开发体验好，Vite 构建速度快，TailwindCSS 原子化 CSS 提高样式开发效率"
+      },
+      {
+        "constraint": "需确保前端渲染库支持代码高亮、数学公式等扩展功能",
+        "decision": "Markdown 编辑器使用 Vditor 或 md-editor-v3，前端渲染",
+        "reason": "前端渲染减轻后端压力，编辑器支持所见即所得和 Markdown 源码模式，支持图片粘贴上传"
+      },
+      {
+        "constraint": "需处理 Token 过期刷新机制，前端需在请求头中统一携带 Token",
+        "decision": "JWT Token 认证",
+        "reason": "无状态认证方案，天然适合前后端分离架构，后端不需维护 session"
+      },
+      {
+        "constraint": "图片存储在项目目录下，备份和迁移时需一并处理图片文件；服务器磁盘空间需预留",
+        "decision": "图片本地服务器存储",
+        "reason": "简单直接，无需依赖第三方对象存储服务，适合个人博客小规模图片管理"
+      },
+      {
+        "constraint": "服务器需安装 Docker 和 Docker Compose；SQLite 数据库文件和图片目录需挂载到宿主机做持久化",
+        "decision": "Docker Compose 容器化部署",
+        "reason": "一键启动前后端服务，环境一致性好，部署简单可复现"
+      },
+      {
+        "constraint": "开发环境需配置对应的 lint 工具和格式化插件",
+        "decision": "前端使用 ESLint + Prettier 规范，后端使用 gofmt",
+        "reason": "保证代码风格统一，降低协作和维护成本"
+      }
+    ],
+    "language": "Go 1.21+ / JavaScript (ES2022+) / TypeScript",
+    "llm_client": "无",
+    "schema_validator": "Gin 内置 binding 校验（基于 go-playground/validator）/ 前端表单校验",
+    "template_engine": "Vue 3 单文件组件（SFC）"
+  }
+}

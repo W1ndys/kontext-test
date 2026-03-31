@@ -1,0 +1,170 @@
+{
+  "coding": [
+    {
+      "rule": "后端 API 响应必须使用统一的 JSON 响应格式封装，包含 code、message、data 三个字段，通过 utils 包中的响应工具函数统一构造，控制器中不得手动拼装不同结构的响应体",
+      "example": "// backend/utils/response.go\ntype Response struct {\n    Code    int         `json:\"code\"`\n    Message string      `json:\"message\"`\n    Data    interface{} `json:\"data\"`\n}\n\nfunc Success(c *gin.Context, data interface{}) {\n    c.JSON(http.StatusOK, Response{Code: 0, Message: \"success\", Data: data})\n}\n\nfunc Fail(c *gin.Context, httpStatus int, code int, message string) {\n    c.JSON(httpStatus, Response{Code: code, Message: message, Data: nil})\n}\n\n// 控制器中调用\nfunc GetArticle(c *gin.Context) {\n    article, err := model.GetArticleByID(id)\n    if err != nil {\n        utils.Fail(c, http.StatusNotFound, 1001, \"文章不存在\")\n        return\n    }\n    utils.Success(c, article)\n}"
+    },
+    {
+      "rule": "后端控制器中必须使用 Gin 的 ShouldBindJSON/ShouldBindQuery 配合 go-playground/validator 标签进行参数校验，校验失败时返回统一错误响应，不得在控制器中手动逐字段校验",
+      "example": "// 请求结构体定义\ntype CreateArticleReq struct {\n    Title      string  `json:\"title\" binding:\"required,min=1,max=200\"`\n    Content    string  `json:\"content\" binding:\"required\"`\n    CategoryID uint    `json:\"category_id\" binding:\"required\"`\n    TagIDs     []uint  `json:\"tag_ids\"`\n}\n\n// 控制器中使用\nfunc CreateArticle(c *gin.Context) {\n    var req CreateArticleReq\n    if err := c.ShouldBindJSON(\u0026req); err != nil {\n        utils.Fail(c, http.StatusBadRequest, 1000, \"参数校验失败: \"+err.Error())\n        return\n    }\n    // 业务逻辑...\n}"
+    },
+    {
+      "rule": "前端 API 封装层必须创建统一的 Axios 实例，在请求拦截器中自动从 Pinia store 读取并附加 JWT Token 到 Authorization 请求头，在响应拦截器中统一处理 401 未认证（清除 Token 并跳转登录页）和网络错误",
+      "example": "// frontend/src/api/request.js\nimport axios from 'axios'\nimport { useUserStore } from '@/stores/user'\nimport router from '@/router'\n\nconst request = axios.create({\n  baseURL: import.meta.env.VITE_API_BASE_URL,\n  timeout: 10000,\n})\n\nrequest.interceptors.request.use((config) =\u003e {\n  const userStore = useUserStore()\n  if (userStore.token) {\n    config.headers.Authorization = `Bearer ${userStore.token}`\n  }\n  return config\n})\n\nrequest.interceptors.response.use(\n  (response) =\u003e response.data,\n  (error) =\u003e {\n    if (error.response?.status === 401) {\n      const userStore = useUserStore()\n      userStore.clearAuth()\n      router.push('/admin/login')\n    }\n    return Promise.reject(error)\n  }\n)\n\nexport default request"
+    },
+    {
+      "rule": "前端 Vue 组件必须使用 Composition API（setup 语法糖），使用 \u003cscript setup\u003e 语法编写，不使用 Options API。响应式数据使用 ref/reactive，props 使用 defineProps，事件使用 defineEmits",
+      "example": "\u003cscript setup\u003e\nimport { ref, onMounted } from 'vue'\nimport { getArticleList } from '@/api/article'\n\nconst props = defineProps({\n  categoryId: {\n    type: Number,\n    default: null,\n  },\n})\n\nconst emit = defineEmits(['select'])\n\nconst articles = ref([])\nconst loading = ref(false)\n\nonMounted(async () =\u003e {\n  loading.value = true\n  const res = await getArticleList({ category_id: props.categoryId })\n  articles.value = res.data\n  loading.value = false\n})\n\u003c/script\u003e"
+    },
+    {
+      "rule": "前端每个 API 模块独立为一个文件，函数命名采用动词开头的驼峰式命名（如 getArticleList、createArticle），所有函数基于统一的 request 实例调用，不得在 API 文件中处理 UI 逻辑",
+      "example": "// frontend/src/api/article.js\nimport request from './request'\n\nexport function getArticleList(params) {\n  return request.get('/articles', { params })\n}\n\nexport function getArticleDetail(id) {\n  return request.get(`/articles/${id}`)\n}\n\nexport function createArticle(data) {\n  return request.post('/admin/articles', data)\n}\n\nexport function updateArticle(id, data) {\n  return request.put(`/admin/articles/${id}`, data)\n}\n\nexport function deleteArticle(id) {\n  return request.delete(`/admin/articles/${id}`)\n}"
+    },
+    {
+      "rule": "后端 Go 代码中错误处理遵循 'early return' 模式：遇到错误立即返回响应并 return，不使用 else 嵌套，保持主逻辑路径在最外层缩进",
+      "example": "func UpdateCategory(c *gin.Context) {\n    id, err := strconv.Atoi(c.Param(\"id\"))\n    if err != nil {\n        utils.Fail(c, http.StatusBadRequest, 1000, \"无效的ID\")\n        return\n    }\n\n    var req UpdateCategoryReq\n    if err := c.ShouldBindJSON(\u0026req); err != nil {\n        utils.Fail(c, http.StatusBadRequest, 1000, \"参数校验失败\")\n        return\n    }\n\n    category, err := model.GetCategoryByID(uint(id))\n    if err != nil {\n        utils.Fail(c, http.StatusNotFound, 1001, \"分类不存在\")\n        return\n    }\n\n    category.Name = req.Name\n    if err := model.UpdateCategory(category); err != nil {\n        utils.Fail(c, http.StatusInternalServerError, 2000, \"更新失败\")\n        return\n    }\n\n    utils.Success(c, category)\n}"
+    },
+    {
+      "rule": "后端路由按公开（前台访客）和受保护（后台管理，需 JWT 中间件）分组注册，路由定义文件中只包含路径映射和中间件挂载，不包含任何业务处理代码",
+      "example": "// backend/router/router.go\nfunc SetupRouter() *gin.Engine {\n    r := gin.Default()\n    r.Use(middleware.Cors())\n\n    // 静态文件服务 - 图片访问\n    r.Static(\"/uploads\", \"./uploads\")\n\n    // 公开 API - 前台访客访问\n    public := r.Group(\"/api\")\n    {\n        public.GET(\"/articles\", controller.GetArticles)\n        public.GET(\"/articles/:id\", controller.GetArticleDetail)\n        public.GET(\"/categories\", controller.GetCategories)\n        public.GET(\"/tags\", controller.GetTags)\n        public.GET(\"/search\", controller.SearchArticles)\n        public.POST(\"/auth/login\", controller.Login)\n    }\n\n    // 受保护 API - 需 JWT 认证\n    admin := r.Group(\"/api/admin\")\n    admin.Use(middleware.JWTAuth())\n    {\n        admin.POST(\"/articles\", controller.CreateArticle)\n        admin.PUT(\"/articles/:id\", controller.UpdateArticle)\n        admin.DELETE(\"/articles/:id\", controller.DeleteArticle)\n        admin.POST(\"/upload\", controller.UploadImage)\n    }\n\n    return r\n}"
+    },
+    {
+      "rule": "后端 GORM 模型定义使用 gorm.Model 嵌入（自动包含 ID、CreatedAt、UpdatedAt、DeletedAt），字段标签同时声明 gorm 和 json 标签，关联关系在模型结构体中显式声明",
+      "example": "// backend/model/article.go\ntype Article struct {\n    gorm.Model\n    Title      string    `gorm:\"type:varchar(200);not null\" json:\"title\"`\n    Content    string    `gorm:\"type:text;not null\" json:\"content\"`\n    Summary    string    `gorm:\"type:varchar(500)\" json:\"summary\"`\n    CategoryID uint      `gorm:\"index;not null\" json:\"category_id\"`\n    ViewCount  int       `gorm:\"default:0\" json:\"view_count\"`\n    Category   Category  `gorm:\"foreignKey:CategoryID\" json:\"category\"`\n    Tags       []Tag     `gorm:\"many2many:article_tags\" json:\"tags\"`\n}\n\ntype Category struct {\n    gorm.Model\n    Name     string    `gorm:\"type:varchar(100);uniqueIndex;not null\" json:\"name\"`\n    Articles []Article `gorm:\"foreignKey:CategoryID\" json:\"articles,omitempty\"`\n}"
+    },
+    {
+      "rule": "前端 TailwindCSS 样式直接写在模板的 class 属性中，不编写自定义 CSS 文件（全局基础样式除外）。组件布局优先使用 Flexbox 和 Grid 工具类，响应式设计使用 Tailwind 断点前缀（sm/md/lg/xl）",
+      "example": "\u003ctemplate\u003e\n  \u003cdiv class=\"min-h-screen bg-gray-50\"\u003e\n    \u003cdiv class=\"max-w-4xl mx-auto px-4 py-8\"\u003e\n      \u003ch1 class=\"text-3xl font-bold text-gray-900 mb-6\"\u003e{{ article.title }}\u003c/h1\u003e\n      \u003cdiv class=\"flex items-center gap-4 text-sm text-gray-500 mb-8\"\u003e\n        \u003cspan\u003e{{ formatDate(article.created_at) }}\u003c/span\u003e\n        \u003cspan class=\"px-2 py-1 bg-blue-100 text-blue-700 rounded\"\u003e\n          {{ article.category.name }}\n        \u003c/span\u003e\n      \u003c/div\u003e\n      \u003cdiv class=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6\"\u003e\n        \u003c!-- 内容卡片 --\u003e\n      \u003c/div\u003e\n    \u003c/div\u003e\n  \u003c/div\u003e\n\u003c/template\u003e"
+    },
+    {
+      "rule": "前端 Pinia Store 按业务模块拆分为独立文件，使用 defineStore 组合式写法，Token 持久化到 localStorage，Store 初始化时从 localStorage 恢复状态",
+      "example": "// frontend/src/stores/user.js\nimport { defineStore } from 'pinia'\nimport { ref, computed } from 'vue'\n\nexport const useUserStore = defineStore('user', () =\u003e {\n  const token = ref(localStorage.getItem('token') || '')\n  const userInfo = ref(null)\n\n  const isLoggedIn = computed(() =\u003e !!token.value)\n\n  function setAuth(newToken, user) {\n    token.value = newToken\n    userInfo.value = user\n    localStorage.setItem('token', newToken)\n  }\n\n  function clearAuth() {\n    token.value = ''\n    userInfo.value = null\n    localStorage.removeItem('token')\n  }\n\n  return { token, userInfo, isLoggedIn, setAuth, clearAuth }\n})"
+    }
+  ],
+  "error_handling": [
+    {
+      "rule": "后端统一响应格式封装：所有 API 响应必须通过 utils 包中的统一响应函数返回，包含 code、message、data 三个字段，成功响应 code 为 0，错误响应使用预定义的业务错误码",
+      "example": "// backend/utils/response.go\nfunc Success(c *gin.Context, data interface{}) {\n\tc.JSON(http.StatusOK, gin.H{\n\t\t\"code\": 0,\n\t\t\"message\": \"success\",\n\t\t\"data\": data,\n\t})\n}\n\nfunc Fail(c *gin.Context, httpStatus int, code int, message string) {\n\tc.JSON(httpStatus, gin.H{\n\t\t\"code\": code,\n\t\t\"message\": message,\n\t\t\"data\": nil,\n\t})\n}\n\n// 控制器中使用\nfunc GetArticle(c *gin.Context) {\n\tarticle, err := model.GetArticleByID(id)\n\tif err != nil {\n\t\tutils.Fail(c, http.StatusNotFound, 1001, \"文章不存在\")\n\t\treturn\n\t}\n\tutils.Success(c, article)\n}"
+    },
+    {
+      "rule": "后端 Gin 控制器中参数绑定与校验错误应立即返回 400 状态码，并附带具体的校验失败信息，使用 Gin 内置的 ShouldBindJSON/ShouldBindQuery 进行绑定，不要使用 MustBind 系列",
+      "example": "func CreateArticle(c *gin.Context) {\n\tvar req CreateArticleRequest\n\tif err := c.ShouldBindJSON(\u0026req); err != nil {\n\t\tutils.Fail(c, http.StatusBadRequest, 1000, \"参数校验失败: \"+err.Error())\n\t\treturn\n\t}\n\t// 业务逻辑...\n}"
+    },
+    {
+      "rule": "后端使用 Gin Recovery 中间件捕获 panic，防止单个请求的 panic 导致整个服务崩溃，Recovery 中间件应在路由初始化时全局注册，并记录 panic 堆栈信息",
+      "example": "func SetupRouter() *gin.Engine {\n\tr := gin.New()\n\tr.Use(gin.Logger())\n\tr.Use(gin.Recovery()) // 全局 panic 恢复\n\t// 注册路由...\n\treturn r\n}"
+    },
+    {
+      "rule": "后端 JWT 认证中间件中 Token 解析失败或过期时，应立即中断请求链并返回 401 状态码，使用 c.Abort() 确保后续 Handler 不被执行",
+      "example": "func JWTAuthMiddleware() gin.HandlerFunc {\n\treturn func(c *gin.Context) {\n\t\ttoken := c.GetHeader(\"Authorization\")\n\t\tif token == \"\" {\n\t\t\tutils.Fail(c, http.StatusUnauthorized, 2001, \"未提供认证令牌\")\n\t\t\tc.Abort()\n\t\t\treturn\n\t\t}\n\t\tclaims, err := utils.ParseToken(token)\n\t\tif err != nil {\n\t\t\tutils.Fail(c, http.StatusUnauthorized, 2002, \"令牌无效或已过期\")\n\t\t\tc.Abort()\n\t\t\treturn\n\t\t}\n\t\tc.Set(\"admin_id\", claims.AdminID)\n\t\tc.Next()\n\t}\n}"
+    },
+    {
+      "rule": "后端数据库操作错误不应直接暴露给客户端，模型层返回 error 给控制器层，控制器层根据错误类型转换为用户友好的错误消息和对应 HTTP 状态码，同时使用日志记录原始错误详情",
+      "example": "// model 层\nfunc GetArticleByID(id uint) (*Article, error) {\n\tvar article Article\n\terr := database.DB.First(\u0026article, id).Error\n\tif err != nil {\n\t\treturn nil, err // 将原始错误返回给控制器\n\t}\n\treturn \u0026article, nil\n}\n\n// controller 层\nfunc GetArticle(c *gin.Context) {\n\tarticle, err := model.GetArticleByID(id)\n\tif err != nil {\n\t\tif errors.Is(err, gorm.ErrRecordNotFound) {\n\t\t\tutils.Fail(c, http.StatusNotFound, 1001, \"文章不存在\")\n\t\t} else {\n\t\t\tlog.Printf(\"获取文章失败: %v\", err)\n\t\t\tutils.Fail(c, http.StatusInternalServerError, 5000, \"服务器内部错误\")\n\t\t}\n\t\treturn\n\t}\n\tutils.Success(c, article)\n}"
+    },
+    {
+      "rule": "前端 Axios 响应拦截器统一处理 HTTP 错误状态码：401 时清除本地 Token 并跳转登录页，403 提示无权限，500 提示服务器异常，网络错误提示网络连接失败，避免在每个页面组件中重复处理",
+      "example": "// frontend/src/api/request.js\nservice.interceptors.response.use(\n  (response) =\u003e {\n    const res = response.data\n    if (res.code !== 0) {\n      ElMessage.error(res.message || '请求失败')\n      return Promise.reject(new Error(res.message))\n    }\n    return res\n  },\n  (error) =\u003e {\n    if (error.response) {\n      switch (error.response.status) {\n        case 401:\n          useUserStore().clearToken()\n          router.push('/admin/login')\n          ElMessage.error('登录已过期，请重新登录')\n          break\n        case 403:\n          ElMessage.error('没有操作权限')\n          break\n        case 500:\n          ElMessage.error('服务器内部错误')\n          break\n        default:\n          ElMessage.error(error.response.data?.message || '请求失败')\n      }\n    } else {\n      ElMessage.error('网络连接失败，请检查网络')\n    }\n    return Promise.reject(error)\n  }\n)"
+    },
+    {
+      "rule": "前端页面组件中调用 API 时使用 try/catch 包裹异步请求，catch 块中处理该页面特有的错误逻辑（如表单提交失败后的 UI 恢复），通用错误已由 Axios 拦截器处理无需重复提示",
+      "example": "// 在 Vue 组件中\nasync function handleSave() {\n  loading.value = true\n  try {\n    await articleApi.createArticle(formData)\n    ElMessage.success('文章发布成功')\n    router.push('/admin/articles')\n  } catch (error) {\n    // 通用错误提示已由拦截器处理\n    // 此处只做页面级别的状态恢复\n    console.error('保存文章失败:', error)\n  } finally {\n    loading.value = false\n  }\n}"
+    },
+    {
+      "rule": "后端图片上传接口需对文件类型和大小进行校验，不符合条件时返回明确的 400 错误信息，包括允许的文件类型和最大文件大小，防止恶意文件上传",
+      "example": "func UploadImage(c *gin.Context) {\n\tfile, err := c.FormFile(\"image\")\n\tif err != nil {\n\t\tutils.Fail(c, http.StatusBadRequest, 3001, \"请选择要上传的图片\")\n\t\treturn\n\t}\n\t// 校验文件大小（最大 5MB）\n\tif file.Size \u003e 5*1024*1024 {\n\t\tutils.Fail(c, http.StatusBadRequest, 3002, \"图片大小不能超过5MB\")\n\t\treturn\n\t}\n\t// 校验文件类型\n\text := strings.ToLower(filepath.Ext(file.Filename))\n\tallowedExts := map[string]bool{\".jpg\": true, \".jpeg\": true, \".png\": true, \".gif\": true, \".webp\": true}\n\tif !allowedExts[ext] {\n\t\tutils.Fail(c, http.StatusBadRequest, 3003, \"仅支持 jpg/jpeg/png/gif/webp 格式的图片\")\n\t\treturn\n\t}\n\t// 保存文件...\n}"
+    },
+    {
+      "rule": "后端数据库初始化失败（SQLite 文件无法创建或打开）时应立即终止程序启动并输出明确的错误信息和文件路径，不允许在数据库不可用的情况下继续提供服务",
+      "example": "// backend/database/database.go\nfunc InitDB(dbPath string) {\n\tvar err error\n\tDB, err = gorm.Open(sqlite.Open(dbPath), \u0026gorm.Config{})\n\tif err != nil {\n\t\tlog.Fatalf(\"数据库连接失败 [%s]: %v\", dbPath, err)\n\t}\n\t// AutoMigrate\n\terr = DB.AutoMigrate(\u0026Article{}, \u0026Category{}, \u0026Tag{}, \u0026Admin{})\n\tif err != nil {\n\t\tlog.Fatalf(\"数据库迁移失败: %v\", err)\n\t}\n\tlog.Println(\"数据库初始化成功\")\n}"
+    },
+    {
+      "rule": "前端路由守卫中 Token 校验失败时，应记录目标路由路径到 redirect 查询参数，登录成功后自动跳转回原页面，提升用户体验；避免在路由守卫中抛出未捕获异常",
+      "example": "// frontend/src/router/index.js\nrouter.beforeEach((to, from, next) =\u003e {\n  const userStore = useUserStore()\n  if (to.meta.requiresAuth) {\n    if (!userStore.token) {\n      next({\n        path: '/admin/login',\n        query: { redirect: to.fullPath }\n      })\n    } else {\n      next()\n    }\n  } else {\n    next()\n  }\n})"
+    }
+  ],
+  "forbidden": [
+    {
+      "rule": "禁止在前端页面组件（views 目录下的 .vue 文件）中直接使用 axios 或 fetch 发起 HTTP 请求，所有请求必须通过 frontend/src/api 层封装的函数调用",
+      "reason": "API 层统一管理请求拦截器（自动携带 JWT Token）、响应拦截器（统一错误处理、Token 过期跳转），绕过该层会导致 Token 遗漏、错误处理不一致等问题"
+    },
+    {
+      "rule": "禁止在前端通用组件（frontend/src/components）中直接调用 API 层函数或直接访问 Pinia Store，组件数据必须通过 props 传入，行为通过 emit 事件传出",
+      "reason": "通用组件需保持业务无关性和可复用性，直接耦合 API 或 Store 会导致组件无法在不同上下文中复用，违背 Vue 组件设计原则"
+    },
+    {
+      "rule": "禁止在后端控制器（backend/controller）中直接使用 db.Raw()、db.Exec() 等方式编写原始 SQL 或直接操作 *gorm.DB 实例进行数据库查询，所有数据库操作必须封装在 backend/model 层中",
+      "reason": "数据访问逻辑集中在模型层管理，控制器职责是参数校验和响应组装，直接操作数据库会导致 SQL 逻辑散落各处，难以维护和优化"
+    },
+    {
+      "rule": "禁止在后端中间件（backend/middleware）中引入控制器层或模型层的具体业务类型和函数，中间件只处理认证、跨域、日志、panic 恢复等横切关注点",
+      "reason": "中间件需保持通用性和可插拔性，耦合业务逻辑会破坏请求处理管道的清晰性，导致中间件无法独立测试和复用"
+    },
+    {
+      "rule": "禁止在前端代码中使用 localStorage/sessionStorage 直接存取 JWT Token，Token 的存储和读取必须统一通过 Pinia Store（frontend/src/stores）管理",
+      "reason": "Token 存取逻辑集中管理可确保一致性，分散存取会导致 Token 状态不同步、清除遗漏等安全隐患，也便于后续切换存储策略"
+    },
+    {
+      "rule": "禁止后端 API 返回非统一格式的 JSON 响应，所有接口（包括错误响应）必须使用 backend/utils 中定义的统一响应结构（如 {code, message, data}）",
+      "reason": "前端 API 层的响应拦截器依赖统一的响应结构进行解析和错误处理，格式不一致会导致前端拦截器逻辑异常或需要大量特殊处理"
+    },
+    {
+      "rule": "禁止在前端使用 Vue 2 的 Options API 风格编写组件，所有组件必须使用 Vue 3 Composition API（\u003cscript setup\u003e 语法糖）",
+      "reason": "项目技术栈明确使用 Vue 3 Composition API，混用两种风格会导致代码风格不统一、开发者认知负担增加，也无法充分利用 \u003cscript setup\u003e 带来的编译优化"
+    },
+    {
+      "rule": "禁止在前端使用内联 style 或自定义 CSS 类来编写可通过 TailwindCSS 工具类实现的样式，应优先使用 TailwindCSS 原子化类名",
+      "reason": "项目选用 TailwindCSS 作为样式方案，混用自定义 CSS 会导致样式管理混乱、产生冗余样式代码，且失去 TailwindCSS 的 purge 优化和设计系统一致性优势"
+    },
+    {
+      "rule": "禁止将 JWT 密钥、管理员初始密码等敏感信息硬编码在源码中，必须通过 backend/config 层从环境变量或配置文件中加载",
+      "reason": "硬编码敏感信息存在严重安全风险，一旦代码仓库泄露将直接暴露密钥；通过配置层统一管理便于不同环境（开发/生产）切换，也符合 Docker 部署最佳实践"
+    },
+    {
+      "rule": "禁止后端图片上传接口接受未经文件类型和大小校验的文件，必须限制允许的图片 MIME 类型（如 image/jpeg、image/png、image/gif、image/webp）并设置合理的文件大小上限",
+      "reason": "不校验上传文件会导致恶意文件上传风险（如可执行文件伪装），无大小限制可能被利用进行存储耗尽攻击，个人博客服务器磁盘资源有限需严格管控"
+    }
+  ],
+  "ai_rules": [
+    {
+      "rule": "生成后端代码时，控制器函数必须使用 Gin 的 binding 标签进行参数校验，不得在控制器中手写 if 判断来校验请求参数的基本格式（如必填、长度、类型），校验失败时使用统一的错误响应格式返回 400 状态码",
+      "reason": "项目选用 Gin 内置 binding 校验（go-playground/validator），手写校验逻辑会导致风格不一致且容易遗漏边界情况，统一使用 binding 标签才能与 ARCHITECTURE_MAP 中控制器层的职责定义保持一致"
+    },
+    {
+      "rule": "生成前端页面组件代码时，所有 HTTP 请求必须通过 frontend/src/api 目录下的封装函数发起，禁止在 .vue 文件中直接 import axios 或 fetch 发起请求",
+      "reason": "API 封装层是前端与后端通信的唯一出口，直接调用 axios 会绕过请求拦截器（JWT Token 自动携带、统一错误处理），导致认证失败或错误处理遗漏"
+    },
+    {
+      "rule": "生成前端组件时，必须使用 Vue 3 Composition API（setup 语法糖 \u003cscript setup\u003e），不得使用 Options API（data/methods/computed 选项式写法）",
+      "reason": "项目技术栈明确选用 Vue 3 Composition API，混用两种风格会导致代码不一致，增加维护成本；setup 语法糖是项目的统一写法约定"
+    },
+    {
+      "rule": "生成后端 API 响应时，必须遵循统一的 JSON 响应结构 {code, message, data}，成功响应 code 为 0 或 200，错误响应携带明确的错误码和中文错误消息，禁止直接返回裸数据或不带 code 字段的 JSON",
+      "reason": "前端 API 封装层的响应拦截器依赖统一的响应结构进行错误判断和数据提取，不一致的响应格式会导致前端解析异常"
+    },
+    {
+      "rule": "生成数据库操作代码时，所有 GORM 操作必须放在 backend/model 包中，控制器层通过调用 model 包的函数访问数据，禁止在 controller 包中直接使用 db.Where()、db.Create() 等 GORM 链式调用",
+      "reason": "架构规则明确要求控制器层不得直接操作数据库连接，数据库操作集中在模型层便于维护、测试和后续优化查询性能"
+    },
+    {
+      "rule": "生成前端样式代码时，必须优先使用 TailwindCSS 工具类，不得在组件中编写自定义 CSS 或使用 scoped style 中的大段样式定义；只有 TailwindCSS 无法表达的复杂动画或极特殊场景才允许编写少量自定义 CSS",
+      "reason": "项目选用 TailwindCSS 原子化 CSS 方案，混用自定义 CSS 会导致样式管理混乱、类名冲突，违背选用 TailwindCSS 的初衷"
+    },
+    {
+      "rule": "生成涉及认证相关代码时，JWT Token 存储必须使用 localStorage，通过 Pinia store 统一管理读写，前端路由守卫从 store 中读取 Token 判断登录状态，禁止在各组件中分散地直接操作 localStorage",
+      "reason": "架构要求状态管理层作为全局数据中心，Token 的存取分散在各组件中会导致状态不同步、难以追踪登录状态变化，也不利于后续实现 Token 刷新逻辑"
+    },
+    {
+      "rule": "生成新文件时必须严格遵循 ARCHITECTURE_MAP 中定义的目录结构，前台页面放 views/blog/，后台页面放 views/admin/，后端控制器放 controller/，模型放 model/，不得自行创建新的顶级目录或随意调整模块归属",
+      "reason": "项目目录结构已在架构设计中明确定义，随意放置文件会破坏层次结构，增加其他开发者（包括 AI）理解项目的成本"
+    },
+    {
+      "rule": "生成后端代码时，所有错误必须被处理，禁止使用 _ 忽略 error 返回值（仅 defer rows.Close() 等明确无需处理的场景除外），错误应通过 Gin 的 c.JSON 返回给前端或通过日志记录",
+      "reason": "Go 语言的错误处理是显式的，忽略 error 会导致静默失败，在 SQLite 操作和文件上传场景中尤为危险，可能造成数据丢失或安全隐患"
+    },
+    {
+      "rule": "生成代码时如需添加新的 API 接口，必须同时说明该接口属于公开 API 还是受保护 API，受保护 API 必须挂载在带有 JWT 中间件的路由组下，并在 API 封装层中标注需要携带 Token",
+      "reason": "架构规则明确要求公开 API 和受保护 API 在路由层严格区分，遗漏 JWT 中间件会导致后台管理接口暴露给未认证用户，构成安全漏洞"
+    }
+  ]
+}

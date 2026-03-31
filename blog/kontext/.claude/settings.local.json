@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(go version:*)",
+      "Bash(npm --version)",
+      "Bash(where node:*)",
+      "Bash(where npm:*)",
+      "Bash(where pnpm:*)",
+      "Bash(pnpm --version)",
+      "Bash(pnpm -v)",
+      "Bash(node:*)",
+      "Bash(D:/nodejs/node.exe -v)",
+      "Bash(go mod:*)",
+      "Bash(go build:*)",
+      "Bash(pnpm install:*)",
+      "Bash(pnpm approve-builds:*)",
+      "Bash(pnpm build:*)",
+      "Bash(pnpm config:*)",
+      "Bash(D:/nodejs/node.exe node_modules/vite/bin/vite.js build)",
+      "Bash(timeout 5 go run .)",
+      "Bash(taskkill //F //IM \"blog-backend\")",
+      "Bash(pkill -f \"blog-backend\")",
+      "Bash(curl -s http://localhost:8080/api/stats)"
+    ]
+  }
+}
