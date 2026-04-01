@@ -12,13 +12,13 @@
 
 ## 测试环境介绍
 
-Claude Code，安装了 superpowers （但在 kontext 环境下实际并未使用该 skills ）
+Claude Code，安装了 superpowers ，但在 kontext 环境下实际并未使用该 skills，在非 kontext 环境下也明示禁止使用该技能，主要是为了测试 kontext 环境下的效果
 
 ## 产物目录
 
 ### kontext 环境下的产物
 
-所在目录： [kontext](./kontext)
+所在目录： [kontext](./kontext)，相关截图在 [screenshots](./kontext/screenshots)
 
 生成报告：
 
@@ -34,4 +34,4 @@ exit status 1
 
 ### 非 kontext 环境下的产物
 
-所在目录： [non-kontext](./non-kontext)
+所在目录： [non-kontext](./non-kontext)，相关截图在 [screenshots](./non-kontext/screenshots)
