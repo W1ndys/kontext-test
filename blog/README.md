@@ -35,3 +35,7 @@ exit status 1
 ### 非 kontext 环境下的产物
 
 所在目录： [non-kontext](./non-kontext)，相关截图在 [screenshots](./non-kontext/screenshots)
+
+生成报告：
+
+耗时 1 小时，但实际效果要比 kontext 环境下更好，功能没什么错误，一气呵成，因为有 superpowers 的参与，如果没有 superpowers 参与的话，预期效果可能不如 kontext，但消耗时间远远超过 kontext 环境下
