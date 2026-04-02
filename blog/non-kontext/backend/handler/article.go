@@ -11,11 +11,10 @@ import (
 )
 
 type paginatedResponse struct {
-	Data       []model.Article `json:"data"`
+	Articles   []model.Article `json:"articles"`
 	Total      int64           `json:"total"`
 	Page       int             `json:"page"`
-	PageSize   int             `json:"page_size"`
-	TotalPages int             `json:"total_pages"`
+	Size       int             `json:"size"`
 }
 
 // GetArticles handles GET /api/articles?page=1&size=10&category=&tag=
@@ -49,17 +48,11 @@ func GetArticles(w http.ResponseWriter, r *http.Request) {
 	offset := (page - 1) * size
 	query.Order("created_at DESC").Offset(offset).Limit(size).Find(&articles)
 
-	totalPages := int(total) / size
-	if int(total)%size != 0 {
-		totalPages++
-	}
-
 	json.NewEncoder(w).Encode(paginatedResponse{
-		Data:       articles,
-		Total:      total,
-		Page:       page,
-		PageSize:   size,
-		TotalPages: totalPages,
+		Articles: articles,
+		Total:    total,
+		Page:     page,
+		Size:     size,
 	})
 }
 
@@ -158,9 +151,6 @@ func UpdateArticle(w http.ResponseWriter, r *http.Request) {
 		Content:  input.Content,
 		Category: input.Category,
 		Tags:     input.Tags,
-		Summary:  input.Summary,
-		Cover:    input.Cover,
-		Status:   input.Status,
 	})
 
 	json.NewEncoder(w).Encode(article)
