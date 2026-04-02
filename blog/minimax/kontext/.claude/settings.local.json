@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(go mod:*)",
+      "Bash(go build:*)",
+      "Bash(go version:*)",
+      "Bash(go env:*)",
+      "Bash(go clean:*)",
+      "Bash(mkdir -p /tmp/testbuild)",
+      "Read(//tmp/**)",
+      "Bash(echo 'package main; import \"\"fmt\"\"; func main\\(\\) { fmt.Println\\(\"\"test\"\"\\) }')",
+      "Bash(cd:*)",
+      "Bash(timeout 5 ./blog.exe、)",
+      "Bash(timeout 5 ./blog.exe)"
+    ]
+  }
+}

@@ -1,0 +1,85 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-gray-50 text-gray-900;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply px-4 py-2 rounded-lg font-medium transition-colors;
+  }
+  .btn-primary {
+    @apply bg-primary-600 text-white hover:bg-primary-700;
+  }
+  .btn-secondary {
+    @apply bg-gray-200 text-gray-800 hover:bg-gray-300;
+  }
+  .btn-danger {
+    @apply bg-red-600 text-white hover:bg-red-700;
+  }
+  .input {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent;
+  }
+  .card {
+    @apply bg-white rounded-xl shadow-md overflow-hidden;
+  }
+}
+
+.prose {
+  @apply text-gray-800 leading-relaxed;
+}
+.prose h1 {
+  @apply text-3xl font-bold mb-4 mt-8;
+}
+.prose h2 {
+  @apply text-2xl font-bold mb-3 mt-6;
+}
+.prose h3 {
+  @apply text-xl font-bold mb-2 mt-4;
+}
+.prose p {
+  @apply mb-4;
+}
+.prose ul, .prose ol {
+  @apply mb-4 pl-6;
+}
+.prose ul {
+  @apply list-disc;
+}
+.prose ol {
+  @apply list-decimal;
+}
+.prose li {
+  @apply mb-1;
+}
+.prose code {
+  @apply bg-gray-100 px-1 py-0.5 rounded text-sm font-mono;
+}
+.prose pre {
+  @apply bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto mb-4;
+}
+.prose pre code {
+  @apply bg-transparent p-0;
+}
+.prose blockquote {
+  @apply border-l-4 border-primary-500 pl-4 italic my-4;
+}
+.prose a {
+  @apply text-primary-600 hover:text-primary-800 underline;
+}
+.prose img {
+  @apply rounded-lg max-w-full h-auto my-4;
+}
+.prose table {
+  @apply w-full border-collapse my-4;
+}
+.prose th, .prose td {
+  @apply border border-gray-300 px-4 py-2;
+}
+.prose th {
+  @apply bg-gray-100 font-bold;
+}

@@ -1,0 +1,222 @@
+{
+  "layers": [
+    {
+      "description": "页面级组件，对应路由页面，包含业务数据展示和用户交互入口",
+      "name": "前端视图层",
+      "packages": [
+        "frontend/src/views/Home.vue",
+        "frontend/src/views/ArticleList.vue",
+        "frontend/src/views/ArticleDetail.vue",
+        "frontend/src/views/Category.vue",
+        "frontend/src/views/Tag.vue",
+        "frontend/src/views/About.vue",
+        "frontend/src/views/admin/Login.vue",
+        "frontend/src/views/admin/ArticleManage.vue",
+        "frontend/src/views/admin/ArticleEdit.vue",
+        "frontend/src/views/admin/CategoryManage.vue",
+        "frontend/src/views/admin/TagManage.vue",
+        "frontend/src/views/admin/CommentManage.vue",
+        "frontend/src/views/admin/Layout.vue"
+      ]
+    },
+    {
+      "description": "可复用的 UI 组件，包括 Markdown 编辑器、评论组件、分页组件等",
+      "name": "前端组件层",
+      "packages": [
+        "frontend/src/components/ArticleCard.vue",
+        "frontend/src/components/Pagination.vue",
+        "frontend/src/components/CommentSection.vue",
+        "frontend/src/components/CommentItem.vue",
+        "frontend/src/components/admin/ArticleEditor.vue",
+        "frontend/src/components/admin/Sidebar.vue",
+        "frontend/src/components/common/Header.vue",
+        "frontend/src/components/common/Footer.vue",
+        "frontend/src/components/common/Loading.vue"
+      ]
+    },
+    {
+      "description": "Pinia 状态管理，管理全局状态如用户认证信息、文章数据缓存",
+      "name": "前端状态管理层",
+      "packages": [
+        "frontend/src/stores/auth.ts",
+        "frontend/src/stores/article.ts",
+        "frontend/src/stores/comment.ts"
+      ]
+    },
+    {
+      "description": "封装所有后端 API 调用，统一处理请求拦截、响应格式和错误处理",
+      "name": "前端 API 层",
+      "packages": [
+        "frontend/src/api/auth.ts",
+        "frontend/src/api/article.ts",
+        "frontend/src/api/category.ts",
+        "frontend/src/api/tag.ts",
+        "frontend/src/api/comment.ts",
+        "frontend/src/api/upload.ts",
+        "frontend/src/api/index.ts"
+      ]
+    },
+    {
+      "description": "通用工具函数，包括 Markdown 解析、图片处理、日期格式化等",
+      "name": "前端工具层",
+      "packages": [
+        "frontend/src/utils/markdown.ts",
+        "frontend/src/utils/request.ts",
+        "frontend/src/utils/time.ts",
+        "frontend/src/utils/clipboard.ts"
+      ]
+    },
+    {
+      "description": "HTTP 路由定义，绑定 URL 路径到 Handler，处理请求方法筛选",
+      "name": "后端路由层",
+      "packages": [
+        "backend/internal/router/router.go",
+        "backend/internal/router/auth.go",
+        "backend/internal/router/article.go",
+        "backend/internal/router/category.go",
+        "backend/internal/router/tag.go",
+        "backend/internal/router/comment.go",
+        "backend/internal/router/upload.go"
+      ]
+    },
+    {
+      "description": "HTTP 请求处理器，解析请求参数、调用 Service 层、返回 JSON 响应",
+      "name": "后端处理器层",
+      "packages": [
+        "backend/internal/handler/auth.go",
+        "backend/internal/handler/article.go",
+        "backend/internal/handler/category.go",
+        "backend/internal/handler/tag.go",
+        "backend/internal/handler/comment.go",
+        "backend/internal/handler/upload.go",
+        "backend/internal/handler/response.go"
+      ]
+    },
+    {
+      "description": "业务逻辑层，封装核心业务规则，如文章发布逻辑、评论审核流程、分类聚合等",
+      "name": "后端服务层",
+      "packages": [
+        "backend/internal/service/auth.go",
+        "backend/internal/service/article.go",
+        "backend/internal/service/category.go",
+        "backend/internal/service/tag.go",
+        "backend/internal/service/comment.go"
+      ]
+    },
+    {
+      "description": "数据结构和数据库模型定义，包括请求/响应 DTO 和数据库实体",
+      "name": "后端模型层",
+      "packages": [
+        "backend/internal/model/article.go",
+        "backend/internal/model/category.go",
+        "backend/internal/model/tag.go",
+        "backend/internal/model/comment.go",
+        "backend/internal/model/user.go",
+        "backend/internal/model/dto/auth.go",
+        "backend/internal/model/dto/article.go",
+        "backend/internal/model/dto/comment.go"
+      ]
+    },
+    {
+      "description": "数据库操作封装，处理 CRUD 操作和事务管理，直接与 SQLite 交互",
+      "name": "后端数据访问层",
+      "packages": [
+        "backend/internal/repository/article.go",
+        "backend/internal/repository/category.go",
+        "backend/internal/repository/tag.go",
+        "backend/internal/repository/comment.go",
+        "backend/internal/repository/user.go",
+        "backend/internal/repository/database.go"
+      ]
+    },
+    {
+      "description": "HTTP 中间件，包括 JWT 认证、日志记录、CORS 跨域和请求限流",
+      "name": "后端中间件层",
+      "packages": [
+        "backend/internal/middleware/auth.go",
+        "backend/internal/middleware/cors.go",
+        "backend/internal/middleware/logger.go",
+        "backend/internal/middleware/recovery.go"
+      ]
+    },
+    {
+      "description": "配置管理和环境变量读取，包括数据库路径、JWT 密钥、服务器端口等",
+      "name": "后端配置层",
+      "packages": [
+        "backend/internal/config/config.go",
+        "backend/.env"
+      ]
+    },
+    {
+      "description": "Docker 容器化部署配置，包括 Dockerfile 和 docker-compose.yml",
+      "name": "部署配置层",
+      "packages": [
+        "Dockerfile",
+        "docker-compose.yml",
+        "nginx.conf"
+      ]
+    }
+  ],
+  "rules": [
+    {
+      "reason": "视图层只负责数据展示和用户交互，API 调用逻辑应统一封装在 api/ 目录，便于统一处理认证头、错误提示和响应格式",
+      "rule": "前端视图层禁止直接调用后端 API，必须通过 API 层发起请求"
+    },
+    {
+      "reason": "保持 API 层纯粹的数据传输职责，业务规则集中在 Service 层，便于维护和测试",
+      "rule": "前端 API 层禁止包含业务逻辑，所有请求/响应处理必须抽离到 Service 层或工具函数"
+    },
+    {
+      "reason": "避免状态管理混乱，页面级状态应保留在组件内部，全局状态才进入 Stores",
+      "rule": "前端状态管理（Pinia Stores）只允许存储用户认证状态和全局共享数据，禁止存放页面级临时状态"
+    },
+    {
+      "reason": "Handler 只负责 HTTP 协议相关的数据解析和响应组装，业务逻辑和数据库操作分离，提高代码可测试性",
+      "rule": "后端 Handler 层禁止直接操作数据库，必须通过 Service 层调用 Repository 层"
+    },
+    {
+      "reason": "Service 层专注于业务规则，HTTP 细节封装在 Handler 层，便于 Service 代码复用和单元测试",
+      "rule": "后端 Service 层禁止直接处理 HTTP 请求和响应，必须依赖 Handler 层传递的数据结构"
+    },
+    {
+      "reason": "Repository 层是数据访问的唯一入口，职责单一则数据库迁移和缓存扩展更方便",
+      "rule": "后端 Repository 层禁止包含业务逻辑，只能进行纯粹的数据存取操作"
+    },
+    {
+      "reason": "统一的数据格式便于接口文档生成、调试和前后端联调，提高开发效率",
+      "rule": "前后端必须通过 JSON 格式进行数据交互，禁止使用表单直传或混合传输方式"
+    },
+    {
+      "reason": "可复用组件通过 props 接收数据和 events 传递交互，保证组件在多个场景下的通用性",
+      "rule": "前端组件层组件必须设计为可复用，禁止在组件内硬编码业务数据或 API 路径"
+    },
+    {
+      "reason": "统一认证入口，避免在每个 Handler 内重复编写认证逻辑，确保安全性一致性",
+      "rule": "后端所有需要认证的接口必须通过 JWT Middleware 验证，Token 解析失败返回 401"
+    },
+    {
+      "reason": "前端路由守卫是第一道防护，配合后端 JWT 认证形成双重保护，提升系统安全性",
+      "rule": "前端必须通过 Vue Router 守卫实现页面访问控制，未登录用户禁止访问 /admin 下的任何页面"
+    },
+    {
+      "reason": "SQLite 是文件锁数据库，高并发下频繁开关连接会导致性能问题和死锁",
+      "rule": "后端数据库连接必须使用单例模式，禁止在每个请求中创建新的数据库连接"
+    },
+    {
+      "reason": "防止恶意文件上传，保护服务器安全；同时避免磁盘空间被无效文件占满",
+      "rule": "图片上传接口必须验证文件类型和大小限制，禁止存储可执行文件"
+    },
+    {
+      "reason": "base64 会导致文章内容体积膨胀，影响加载速度；后端统一存储便于管理和 CDN 加速",
+      "rule": "前端 Markdown 编辑器的图片粘贴功能必须先上传到后端，禁止使用 base64 内嵌"
+    },
+    {
+      "reason": "防止垃圾评论泛滥，博主可后台审核后再展示，保证前台内容质量",
+      "rule": "后端评论管理必须支持审核状态字段，访客提交的评论默认待审核状态"
+    },
+    {
+      "reason": "敏感配置如数据库路径、JWT 密钥等必须通过环境变量或本地文件管理，避免信息泄露",
+      "rule": "前后端项目配置文件（.env、config.go）禁止提交到版本仓库"
+    }
+  ]
+}

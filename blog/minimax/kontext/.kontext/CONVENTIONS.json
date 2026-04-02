@@ -1,0 +1,258 @@
+{
+  "coding": [
+    {
+      "rule": "Go 源文件使用 snake_case 命名法，文件名与主要结构体或功能对应，如 article_handler.go、auth_service.go",
+      "example": "article_handler.go\ncategory_repository.go"
+    },
+    {
+      "rule": "Go 代码中使用 PascalCase 命名类型、函数和导出变量，使用 camelCase 命名局部变量和函数参数",
+      "example": "func GetArticleByID(id uint) (*model.Article, error) {\n    var article model.Article\n    db.First(\u0026article, id)\n    return \u0026article, nil\n}"
+    },
+    {
+      "rule": "Go 错误处理使用直接返回 error 模式，禁止使用 panic/recover 处理业务逻辑错误",
+      "example": "article, err := s.repo.GetByID(id)\nif err != nil {\n    return nil, err\n}\nif article == nil {\n    return nil, errors.New(\"article not found\")\n}"
+    },
+    {
+      "rule": "Go 处理器必须通过统一响应函数封装返回格式，禁止直接使用 c.JSON 裸返",
+      "example": "// response.go\nfunc Success(c *gin.Context, data interface{}) {\n    c.JSON(200, gin.H{\"code\": 0, \"data\": data})\n}\n\nfunc Error(c *gin.Context, code int, msg string) {\n    c.JSON(400, gin.H{\"code\": code, \"message\": msg})\n}\n\n// handler 使用\nresponse.Success(c, article)\nresponse.Error(c, 1001, \"article not found\")"
+    },
+    {
+      "rule": "Go HTTP 路由必须区分 GET/POST/PUT/DELETE 方法，路径使用 RESTful 风格",
+      "example": "articlesGroup := v1.Group(\"/articles\")\narticlesGroup.GET(\"\", articleHandler.List)\narticlesGroup.GET(\"/:id\", articleHandler.Get)\narticlesGroup.POST(\"\", articleHandler.Create)\narticlesGroup.PUT(\"/:id\", articleHandler.Update)\narticlesGroup.DELETE(\"/:id\", articleHandler.Delete)"
+    },
+    {
+      "rule": "Go 数据库操作必须使用 GORM 的上下文方法（WithContext），禁止使用不带上下文的方法",
+      "example": "func (r *articleRepository) GetByID(ctx context.Context, id uint) (*model.Article, error) {\n    var article model.Article\n    result := r.db.WithContext(ctx).First(\u0026article, id)\n    return \u0026article, result.Error\n}"
+    },
+    {
+      "rule": "Go 中间件链顺序固定为：Recovery -\u003e Logger -\u003e CORS -\u003e JWT（认证接口）",
+      "example": "func SetupRouter() *gin.Engine {\n    r := gin.Default()\n    // Recovery 和 Logger 已内置\n    r.Use(middleware.CORS())\n    \n    // 公开路由\n    public := r.Group(\"/api/v1\")\n    public.Use(middleware.RateLimit())\n    // ...\n    \n    // 受保护路由\n    protected := r.Group(\"/api/v1/admin\")\n    protected.Use(middleware.JWT())\n    // ...\n    return r\n}"
+    },
+    {
+      "rule": "Go 配置文件使用 viper 管理，所有配置项必须有默认值并在代码中定义结构体标签",
+      "example": "type Config struct {\n    ServerPort string `mapstructure:\"SERVER_PORT\" env:\"SERVER_PORT\" default:\":8080\"`\n    DBPath     string `mapstructure:\"DB_PATH\" env:\"DB_PATH\" default:\"./data/blog.db\"`\n    JWTSecret  string `mapstructure:\"JWT_SECRET\" env:\"JWT_SECRET\"`\n}"
+    },
+    {
+      "rule": "Vue 组件文件使用 PascalCase 命名法，文件名与组件名一致，如 ArticleCard.vue、CommentSection.vue",
+      "example": "ArticleCard.vue\nPagination.vue\nAdminSidebar.vue"
+    },
+    {
+      "rule": "Vue 组件中 script 必须使用 \u003cscript setup lang=\"ts\"\u003e 语法，禁用 Options API",
+      "example": "\u003cscript setup lang=\"ts\"\u003e\nimport { ref, computed, onMounted } from 'vue'\nimport type { Article } from '@/types'\n\nconst props = defineProps\u003c{\n  article: Article\n}\u003e()\n\nconst emit = defineEmits\u003c{\n  (e: 'delete', id: number): void\n}\u003e()\n\nconst formattedDate = computed(() =\u003e {\n  return new Date(props.article.created_at).toLocaleDateString()\n})\n\u003c/script\u003e"
+    },
+    {
+      "rule": "TypeScript 接口和类型定义必须放在 @/types 目录下，文件名与类型名对应，如 types/article.ts",
+      "example": "// types/article.ts\nexport interface Article {\n  id: number\n  title: string\n  content: string\n  slug: string\n  category_id: number\n  tags: Tag[]\n  created_at: string\n  updated_at: string\n}\n\nexport interface ArticleListParams {\n  page: number\n  page_size: number\n  category_id?: number\n  tag_id?: number\n}"
+    },
+    {
+      "rule": "Vue 组件样式必须使用 TailwindCSS 类名，禁止使用 scoped CSS 或less/sass，除非确有必需",
+      "example": "\u003ctemplate\u003e\n  \u003cdiv class=\"max-w-4xl mx-auto px-4 py-8\"\u003e\n    \u003ch1 class=\"text-3xl font-bold text-gray-900\"\u003e{{ article.title }}\u003c/h1\u003e\n    \u003cdiv class=\"mt-4 prose max-w-none\" v-html=\"renderedContent\"\u003e\u003c/div\u003e\n  \u003c/div\u003e\n\u003c/template\u003e"
+    },
+    {
+      "rule": "Vue 模板中绑定事件使用 @ 前缀（如 @click），属性绑定使用 : 前缀（如 :class），禁止使用 v-on/v-bind 完整写法",
+      "example": "\u003cbutton \n  @click=\"handleSubmit\" \n  :disabled=\"loading\"\n  class=\"px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700\"\n\u003e\n  提交\n\u003c/button\u003e"
+    },
+    {
+      "rule": "前端 API 调用必须封装为独立模块，使用 async/await 模式，统一处理错误和 loading 状态",
+      "example": "// api/article.ts\nimport request from './index'\nimport type { Article, ArticleListParams } from '@/types'\n\nexport const getArticleList = async (params: ArticleListParams) =\u003e {\n  const { data } = await request.get\u003c{ list: Article[]; total: number }\u003e('/articles', { params })\n  return data\n}\n\nexport const createArticle = async (payload: Partial\u003cArticle\u003e) =\u003e {\n  const { data } = await request.post\u003cArticle\u003e('/articles', payload)\n  return data\n}"
+    },
+    {
+      "rule": "前端 API 请求封装必须统一添加 Authorization 请求头，处理 401 未授权跳转登录",
+      "example": "// utils/request.ts\nimport axios from 'axios'\nimport { useAuthStore } from '@/stores/auth'\nimport router from '@/router'\n\nconst request = axios.create({ baseURL: import.meta.env.VITE_API_BASE })\n\nrequest.interceptors.request.use((config) =\u003e {\n  const authStore = useAuthStore()\n  if (authStore.token) {\n    config.headers.Authorization = `Bearer ${authStore.token}`\n  }\n  return config\n})\n\nrequest.interceptors.response.use(\n  (response) =\u003e response,\n  (error) =\u003e {\n    if (error.response?.status === 401) {\n      const authStore = useAuthStore()\n      authStore.logout()\n      router.push('/admin/login')\n    }\n    return Promise.reject(error)\n  }\n)"
+    },
+    {
+      "rule": "Vue 组件中响应式数据优先使用 ref，对于对象类型使用 reactive，computed 必须有明确的返回值类型注解",
+      "example": "const loading = ref(false)\nconst articles = ref\u003cArticle[]\u003e([])\nconst filters = reactive({\n  category_id: null,\n  tag_id: null\n})\n\nconst filteredArticles = computed\u003cArticle[]\u003e(() =\u003e {\n  return articles.value.filter(a =\u003e a.status === 'published')\n})"
+    },
+    {
+      "rule": "前端路由守卫必须在路由配置中定义，必须检查认证状态和角色权限，未登录访问管理页面重定向到登录页",
+      "example": "// router/index.ts\nimport { createRouter, createWebHistory } from 'vue-router'\nimport { useAuthStore } from '@/stores/auth'\n\nconst router = createRouter({\n  routes: [\n    { path: '/admin/login', name: 'Login', component: Login },\n    { \n      path: '/admin', \n      name: 'Admin',\n      component: AdminLayout,\n      meta: { requiresAuth: true },\n      children: [\n        { path: 'articles', name: 'ArticleManage', component: ArticleManage }\n      ]\n    }\n  ]\n})\n\nrouter.beforeEach((to, from, next) =\u003e {\n  const authStore = useAuthStore()\n  if (to.meta.requiresAuth \u0026\u0026 !authStore.isAuthenticated) {\n    next({ name: 'Login', query: { redirect: to.fullPath } })\n  } else {\n    next()\n  }\n})"
+    },
+    {
+      "rule": "Markdown 内容渲染必须使用 DOMPurify 过滤 XSS，禁止直接渲染用户输入的原始 HTML",
+      "example": "import DOMPurify from 'dompurify'\nimport { marked } from 'marked'\n\nconst renderedContent = computed(() =\u003e {\n  const html = marked(article.content)\n  return DOMPurify.sanitize(html as string)\n})"
+    },
+    {
+      "rule": "图片上传接口必须在前端验证文件类型（image/jpeg、image/png、image/gif）和大小限制（5MB）",
+      "example": "const validateImage = (file: File): boolean =\u003e {\n  const allowedTypes = ['image/jpeg', 'image/png', 'image/gif']\n  const maxSize = 5 * 1024 * 1024 // 5MB\n  \n  if (!allowedTypes.includes(file.type)) {\n    ElMessage.error('仅支持 JPG、PNG、GIF 格式图片')\n    return false\n  }\n  if (file.size \u003e maxSize) {\n    ElMessage.error('图片大小不能超过 5MB')\n    return false\n  }\n  return true\n}"
+    }
+  ],
+  "error_handling": [
+    {
+      "rule": "后端必须使用统一的响应结构返回错误，通过 response.go 中的封装方法处理所有 HTTP 响应",
+      "example": "// 成功响应\nresponse.Success(c, data)\n// 业务错误\nresponse.Error(c, 400, \"文章标题不能为空\")\n// 服务器错误\nresponse.Error(c, 500, \"数据库操作失败\")"
+    },
+    {
+      "rule": "前后端必须使用标准 HTTP 状态码区分错误类型：200 成功、400 参数错误、401 未认证、403 禁止访问、404 资源不存在、500 服务器错误",
+      "example": "// 后端返回 401 未认证\nresponse.Unauthorized(c, \"Token 已过期，请重新登录\")\n// 前端 axios 拦截器判断 status\nif (error.response?.status === 401) { router.push('/admin/login') }"
+    },
+    {
+      "rule": "前端 API 层必须统一处理业务错误码，组件层只处理 UI 状态（如显示错误提示），禁止组件直接判断后端返回的错误码",
+      "example": "// api/index.ts 统一处理\naxios.interceptors.response.use(\n  response =\u003e response,\n  error =\u003e {\n    const { code, message } = error.response?.data || {}\n    if (code === 1001) { ElMessage.error('登录已过期') }\n    return Promise.reject(error)\n  }\n)"
+    },
+    {
+      "rule": "后端参数验证必须在 Handler 层完成，使用 go-playground/validator 验证请求 DTO，验证失败返回 400 和具体字段错误信息",
+      "example": "type CreateArticleDTO struct {\n  Title string `json:\"title\" binding:\"required,min=1,max=200\"`\n  Content string `json:\"content\" binding:\"required\"`\n}\n// 验证失败返回: {\"code\": 400, \"message\": \"Title为必填字段\"}"
+    },
+    {
+      "rule": "后端必须使用 Recovery 中间件捕获 panic 异常，记录日志并返回 500 错误，禁止让 panic 蔓延导致服务崩溃",
+      "example": "// middleware/recovery.go\nfunc Recovery() gin.HandlerFunc {\n  return func(c *gin.Context) {\n    defer func() {\n      if r := recover(); r != nil {\n        log.Error(\"panic recovered:\", r)\n        response.Error(c, 500, \"服务器内部错误\")\n        c.Abort()\n      }\n    }()\n    c.Next()\n  }\n}"
+    },
+    {
+      "rule": "数据库操作错误必须在 Repository 层捕获并转换为业务错误，禁止将 SQL 错误直接暴露给前端",
+      "example": "func (r *ArticleRepo) GetByID(id uint) (*model.Article, error) {\n  var article model.Article\n  if err := r.db.First(\u0026article, id).Error; err != nil {\n    if errors.Is(err, gorm.ErrRecordNotFound) {\n      return nil, errors.New(\"文章不存在\")\n    }\n    return nil, errors.New(\"数据库查询失败\")\n  }\n  return \u0026article, nil\n}"
+    },
+    {
+      "rule": "JWT Token 验证失败必须返回 401，前端路由守卫根据 401 状态码自动跳转到登录页并清除本地 Token",
+      "example": "// 前端路由守卫\nrouter.beforeEach((to, from, next) =\u003e {\n  if (to.path.startsWith('/admin')) {\n    const token = localStorage.getItem('token')\n    if (!token) { return next('/admin/login') }\n  }\n  next()\n})"
+    },
+    {
+      "rule": "前端表单验证错误必须先在组件层检查并提示用户，只有通过前端验证的请求才发送到后端 API",
+      "example": "// ArticleEdit.vue\nconst submitArticle = async () =\u003e {\n  if (!form.title.trim()) { ElMessage.warning('请输入文章标题'); return }\n  if (!form.content.trim()) { ElMessage.warning('请输入文章内容'); return }\n  await api.createArticle(form)\n}"
+    },
+    {
+      "rule": "错误日志必须包含请求追踪信息（请求 ID、用户标识、操作路径、错误时间），便于问题定位和排查",
+      "example": "log.WithFields(log.Fields{\n  \"request_id\": c.Get(\"request_id\"),\n  \"user_id\": c.Get(\"user_id\"),\n  \"path\": c.Request.URL.Path,\n  \"error\": err.Error(),\n}).Error(\"处理请求失败\")"
+    },
+    {
+      "rule": "后端返回给前端的错误消息必须是用户友好的描述，禁止返回数据库错误详情、系统路径或内部实现细节",
+      "example": "// 错误示例：返回 \"SQL syntax error near 'WHERE id = 1'\"\n// 正确示例：返回 \"数据查询失败，请稍后重试\""
+    }
+  ],
+  "forbidden": [
+    {
+      "rule": "后端 Handler 层禁止直接操作数据库，所有数据库访问必须通过 Service 层调用 Repository 层实现",
+      "reason": "遵循分层架构原则，确保业务逻辑与数据访问解耦，提高代码可测试性和可维护性"
+    },
+    {
+      "rule": "后端 Service 层禁止直接处理 HTTP 请求和响应，HTTP 相关逻辑必须封装在 Handler 层",
+      "reason": "Service 层应专注于业务规则，使代码可复用且易于单元测试，不应耦合 Web 框架细节"
+    },
+    {
+      "rule": "后端 Repository 层禁止包含业务逻辑，只能进行纯粹的数据存取操作",
+      "reason": "数据访问层职责单一，耦合数据库实现便于未来迁移数据库或添加缓存"
+    },
+    {
+      "rule": "前端视图层禁止直接调用后端 API，所有后端请求必须通过 api/ 目录封装",
+      "reason": "统一 API 调用入口便于处理认证头、错误提示和响应格式，避免重复代码"
+    },
+    {
+      "rule": "前端 API 层禁止包含业务逻辑，请求/响应的数据转换必须抽离到工具函数",
+      "reason": "API 层只负责数据传输职责，业务规则集中在组件或 Store 中"
+    },
+    {
+      "rule": "前端状态管理（Pinia Stores）禁止存放页面级临时状态，只允许存储用户认证状态和全局共享数据",
+      "reason": "避免状态管理混乱，页面级状态应保留在组件内部，全局状态才进入 Stores"
+    },
+    {
+      "rule": "前端组件必须设计为可复用组件，禁止在组件内硬编码业务数据、API 路径或具体页面逻辑",
+      "reason": "可复用组件通过 props 接收数据、通过 events 传递交互，保证组件在多个场景下的通用性"
+    },
+    {
+      "rule": "禁止在前端代码中硬编码后端 API 地址，所有 API 路径必须从环境变量或配置中心读取",
+      "reason": "避免开发/生产环境切换时修改多处代码，提高部署灵活性"
+    },
+    {
+      "rule": "数据库连接禁止在每个请求中创建新的连接实例，必须使用单例模式管理连接池",
+      "reason": "SQLite 是文件锁数据库，频繁创建连接会导致性能问题和潜在死锁"
+    },
+    {
+      "rule": "所有需要认证的后端接口禁止绕过 JWT Middleware，Token 验证失败必须返回 401 状态码",
+      "reason": "统一认证入口，确保所有敏感操作都经过身份验证，防止未授权访问"
+    },
+    {
+      "rule": "前端必须通过 Vue Router 守卫实现后台页面访问控制，未登录用户禁止访问 /admin 路径下的任何页面",
+      "reason": "前端路由守卫是第一道防护，配合后端 JWT 认证形成双重保护"
+    },
+    {
+      "rule": "图片上传接口禁止存储未通过类型和大小验证的文件，禁止接受可执行文件",
+      "reason": "防止恶意文件上传保护服务器安全，同时避免磁盘空间被无效文件占满"
+    },
+    {
+      "rule": "前端 Markdown 编辑器的图片粘贴功能禁止使用 base64 内嵌，必须先上传到后端获取路径",
+      "reason": "base64 会导致文章内容体积膨胀影响加载速度，后端统一存储便于管理和 CDN 加速"
+    },
+    {
+      "rule": "禁止在数据库中存储明文密码，密码必须经过 bcrypt 或同等强度的哈希处理",
+      "reason": "保护用户数据安全，即使数据库泄露攻击者也无法获取明文密码"
+    },
+    {
+      "rule": "禁止在前端存储 JWT Token 到 localStorage，必须使用 cookie 并设置 HttpOnly、Secure 标记",
+      "reason": "localStorage 易受 XSS 攻击，HttpOnly cookie 可防止 JavaScript 读取敏感凭证"
+    },
+    {
+      "rule": "禁止在代码中硬编码敏感配置（数据库路径、JWT 密钥、API 密钥等），敏感信息必须通过环境变量或 .env 文件管理",
+      "reason": "敏感配置外置便于不同环境使用不同配置，避免信息泄露到版本仓库"
+    },
+    {
+      "rule": "后端禁止直接返回数据库错误信息给前端，必须统一封装为通用错误响应格式",
+      "reason": "防止数据库结构、查询逻辑等内部信息泄露给攻击者，同时避免暴露实现细节给用户"
+    },
+    {
+      "rule": "禁止在 SQL 查询中使用字符串拼接构建查询条件，必须使用参数化查询",
+      "reason": "防止 SQL 注入攻击，这是最常见也最危险的安全漏洞"
+    },
+    {
+      "rule": "禁止将用户输入的评论内容直接渲染到页面，必须进行 XSS 过滤和 HTML 转义",
+      "reason": "防止跨站脚本攻击（XSS），保护其他访客的浏览器安全"
+    },
+    {
+      "rule": "前后端必须通过 JSON 格式进行数据交互，禁止使用表单直传或混合传输方式",
+      "reason": "统一数据格式便于接口文档生成、调试和前后端联调，提高开发效率"
+    },
+    {
+      "rule": "禁止提交 .env 文件、config.local.js 等包含敏感信息的配置文件到版本仓库",
+      "reason": "即使私有仓库也存在泄露风险，敏感配置应通过 .gitignore 排除并使用模板文件管理"
+    },
+    {
+      "rule": "禁止在生产环境开启调试模式或输出详细日志到控制台，必须使用结构化日志并配置合适的日志级别",
+      "reason": "生产环境调试信息可能暴露系统架构和运行细节，同时影响性能"
+    },
+    {
+      "rule": "后端评论管理禁止直接展示未审核的评论，新评论默认必须为待审核状态",
+      "reason": "防止垃圾评论泛滥，博主可在后台审核后再展示，保证前台内容质量"
+    }
+  ],
+  "ai_rules": [
+    {
+      "rule": "AI 生成的前端代码必须遵循分层架构：视图层组件只处理数据展示和用户交互，API 调用必须通过 api/ 目录发起，禁止在 .vue 文件中直接使用 axios 或 fetch",
+      "reason": "确保前端代码结构清晰可维护，统一的数据请求入口便于错误追踪和接口管理"
+    },
+    {
+      "rule": "AI 生成的后端代码必须遵循分层约束：Handler 只处理 HTTP 协议相关逻辑，Service 专注业务规则，Repository 只做数据存取，禁止跨层调用",
+      "reason": "分层架构是代码可测试性和可维护性的基础，跨层调用会破坏职责边界，导致代码耦合"
+    },
+    {
+      "rule": "AI 在修改数据库相关代码前，必须确认使用单例数据库连接模式，禁止在每个请求中创建新的数据库连接或关闭连接池",
+      "reason": "SQLite 对并发连接有限制，单例模式可避免连接泄露和死锁问题"
+    },
+    {
+      "rule": "AI 生成的所有 API 响应必须使用统一的 JSON 格式，通过 response.go 中封装的方法返回，包含 code、message、data 三个标准字段",
+      "reason": "统一响应格式便于前端统一处理错误和成功情况，提高联调效率"
+    },
+    {
+      "rule": "AI 在实现图片上传功能时，必须包含文件类型白名单校验、大小限制和文件重命名逻辑，禁止直接保存用户上传的原始文件名",
+      "reason": "防止恶意文件上传攻击和文件名冲突导致的安全问题"
+    },
+    {
+      "rule": "AI 在编写认证相关代码时，所有需要登录才能访问的 API 必须通过 JWT Middleware 验证，Token 解析失败必须返回 401 状态码",
+      "reason": "确保系统安全性，防止未授权访问，同时统一认证入口便于安全审计"
+    },
+    {
+      "rule": "AI 在生成前端路由配置时，必须包含路由守卫逻辑，/admin 路径下的页面必须检查 Pinia auth store 中的登录状态，未登录重定向到登录页",
+      "reason": "前后端双重认证防护，提升系统整体安全性，用户体验也更流畅"
+    },
+    {
+      "rule": "AI 在处理评论相关业务时，必须实现审核状态字段，访客提交的评论默认状态为 pending（待审核），只有审核通过的评论才在前台展示",
+      "reason": "防止垃圾评论泛滥，保护博客内容质量，博主可后台统一管理"
+    },
+    {
+      "rule": "AI 生成的 Markdown 编辑器相关代码必须先上传图片到后端获取 URL，禁止使用 base64 内嵌图片到文章内容中",
+      "reason": "base64 会导致文章体积膨胀，影响加载速度；后端统一存储便于管理和后续 CDN 加速"
+    },
+    {
+      "rule": "AI 在生成代码时，所有敏感配置（如 JWT 密钥、数据库路径、端口号）必须从环境变量或 .env 文件读取，禁止硬编码在源码中",
+      "reason": "敏感信息硬编码有安全风险，且不同部署环境需要不同配置，外部化配置提高安全性并简化部署"
+    }
+  ]
+}
