@@ -12,7 +12,7 @@
 
 ## 测试环境介绍
 
-Claude Code，安装了 superpowers ，但在 kontext 环境下实际并未使用该 skills，在非 kontext 环境下也明示禁止使用该技能，主要是为了测试 kontext 环境下的效果
+Claude Code，安装了 superpowers ，但由于 kontext 环境下提供了多轮对话澄清，所以在非 kontext 环境下也使用该 skills，本次测试主要用于测试 kontext 环境下的效果，kontext 对于开发过程的约束效果
 
 ## 产物目录
 
