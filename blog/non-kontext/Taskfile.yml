@@ -1,0 +1,144 @@
+version: '3'
+
+vars:
+  BACKEND_DIR: ./backend
+  FRONTEND_DIR: ./frontend
+  DATA_DIR: ./data
+  BINARY_NAME: server
+  PORT: 8080
+
+tasks:
+  # ==================== 环境安装 ====================
+  install:
+    desc: 安装前后端所有依赖
+    cmds:
+      - task: install:backend
+      - task: install:frontend
+
+  install:backend:
+    desc: 安装后端 Go 依赖
+    dir: '{{.BACKEND_DIR}}'
+    cmds:
+      - go mod download
+      - go mod tidy
+
+  install:frontend:
+    desc: 安装前端 npm 依赖
+    dir: '{{.FRONTEND_DIR}}'
+    cmds:
+      - npm install
+
+  # ==================== 本地开发 ====================
+  dev:
+    desc: 同时启动前后端开发服务器
+    deps:
+      - dev:backend
+      - dev:frontend
+
+  dev:backend:
+    desc: 启动后端开发服务器 (端口 {{.PORT}})
+    dir: '{{.BACKEND_DIR}}'
+    cmds:
+      - go run .
+
+  dev:frontend:
+    desc: 启动前端开发服务器 (代理到后端 {{.PORT}})
+    dir: '{{.FRONTEND_DIR}}'
+    cmds:
+      - npm run dev
+
+  # ==================== 构建 ====================
+  build:
+    desc: 构建前后端产物
+    cmds:
+      - task: build:frontend
+      - task: build:backend
+
+  build:backend:
+    desc: 编译后端二进制文件
+    dir: '{{.BACKEND_DIR}}'
+    cmds:
+      - CGO_ENABLED=0 go build -o {{.BINARY_NAME}} .
+    generates:
+      - '{{.BACKEND_DIR}}/{{.BINARY_NAME}}'
+
+  build:frontend:
+    desc: 构建前端静态文件
+    dir: '{{.FRONTEND_DIR}}'
+    cmds:
+      - npm run build
+    generates:
+      - '{{.FRONTEND_DIR}}/dist/**'
+
+  # ==================== 本地部署运行 ====================
+  serve:
+    desc: 构建并以生产模式本地运行（单进程托管前后端）
+    cmds:
+      - task: build
+      - task: serve:run
+
+  serve:run:
+    desc: 运行已构建的服务（需先执行 build）
+    dir: '{{.BACKEND_DIR}}'
+    cmds:
+      - cmd: cp -r ../frontend/dist ./static
+        silent: true
+      - cmd: mkdir -p ../data/uploads
+        silent: true
+      - ./{{.BINARY_NAME}}
+
+  # ==================== Docker 部署 ====================
+  docker:up:
+    desc: Docker 构建并启动容器
+    cmds:
+      - docker compose up --build -d
+
+  docker:down:
+    desc: 停止并移除 Docker 容器
+    cmds:
+      - docker compose down
+
+  docker:logs:
+    desc: 查看 Docker 容器日志
+    cmds:
+      - docker compose logs -f
+
+  docker:restart:
+    desc: 重启 Docker 容器
+    cmds:
+      - docker compose restart
+
+  # ==================== 清理 ====================
+  clean:
+    desc: 清理所有构建产物
+    cmds:
+      - rm -rf {{.FRONTEND_DIR}}/dist
+      - rm -f {{.BACKEND_DIR}}/{{.BINARY_NAME}}
+      - rm -rf {{.BACKEND_DIR}}/static
+
+  clean:data:
+    desc: 清理本地数据（数据库和上传文件）
+    prompt: 确认删除本地数据（数据库和上传的图片）？
+    cmds:
+      - rm -rf {{.DATA_DIR}}
+      - rm -rf {{.BACKEND_DIR}}/data
+
+  # ==================== 检查 ====================
+  check:
+    desc: 检查开发环境是否就绪
+    cmds:
+      - cmd: echo "=== 检查 Go ==="
+        silent: true
+      - go version
+      - cmd: echo "=== 检查 Node ==="
+        silent: true
+      - node --version
+      - cmd: echo "=== 检查 npm ==="
+        silent: true
+      - npm --version
+      - cmd: echo "=== 检查 Docker（可选） ==="
+        silent: true
+      - cmd: docker --version || echo "Docker 未安装（仅本地开发不需要）"
+        ignore_error: true
+      - cmd: echo "=== 环境检查完成 ==="
+        silent: true
